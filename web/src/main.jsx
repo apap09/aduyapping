@@ -7,6 +7,7 @@ import './styles.css';
 import './doodle.css';
 import { initUiSounds } from './lib/sound.js';
 import { FAVICON_SRC } from '../config/brand.js';
+import { probeImage } from './lib/img.js';
 
 initUiSounds();
 
@@ -20,6 +21,10 @@ if (FAVICON_SRC) {
   }
   link.removeAttribute('type');
   link.href = FAVICON_SRC;
+  // cocokkan dengan format yang benar-benar ada (png/webp/...)
+  probeImage(FAVICON_SRC).then((url) => {
+    if (url) link.href = url;
+  });
 }
 
 createRoot(document.getElementById('root')).render(

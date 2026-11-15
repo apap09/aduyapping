@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { findSkin } from '../../config/skins.js';
+import SmartImg from './SmartImg.jsx';
 
 const INK = '#111111';
 const ORANGE = '#ff6a00';
@@ -101,7 +102,7 @@ export default function Avatar({ skin, size = 56, dead = false, hits = 0, bob = 
         animate={hits ? { x: [0, -6, 6, -4, 3, 0] } : { x: 0 }}
         transition={{ duration: 0.32 }}
       >
-        {s.image ? <img src={s.image} alt="" draggable="false" /> : <Figure look={s.look} />}
+        {s.image ? <SmartImg src={s.image} alt="" draggable="false" /> : <Figure look={s.look} />}
       </motion.div>
     </motion.div>
   );

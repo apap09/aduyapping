@@ -4,18 +4,20 @@
 // Setelah diedit, commit ke GitHub dan Vercel otomatis deploy ulang.
 //
 // Menambah skin baru:
-// 1. Taruh gambar (png/svg/webp) di folder web/public/skins/
+// 1. Taruh gambar (webp/png/jpg/gif/svg) di folder web/public/skins/
 // 2. Tambahkan baris baru di bawah dengan `image: '/skins/namafile.png'`
 //    (id harus unik, huruf kecil dan underscore saja)
+//    Mau ganti ke WebP? Cukup taruh file dengan nama sama berakhiran .webp (mis. hitam.webp)
+//    dan hapus yang lama; format lain otomatis dicari, config tidak perlu diubah.
 //
 // Skin tanpa `image` digambar oleh kode (lihat `look`).
 // Skin default (price 0) otomatis dimiliki semua akun yang login.
 // ============================================================
 
-export const DEFAULT_SKIN = 'white';
+export const DEFAULT_SKIN = 'mas_hitam';
 
 export const SKINS = [
-  { id: 'white', name: 'Si White jir', price: 0, image: '/skins/white.png' },
+  { id: 'mas_hitam', name: 'Mas Hitam', price: 0, image: '/skins/hitam.png' },
   { id: 'Amongus_jir', name: 'Amongus', price: 420, image: '/skins/amongus1.png' },
   { id: 'ajg_ngeri', name: 'Ajggg', price: 666, image: '/skins/ajg.png' },
   // Contoh skin dengan gambar sendiri (hapus tanda // untuk mengaktifkan):

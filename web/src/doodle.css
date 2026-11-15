@@ -258,7 +258,21 @@ html[data-theme='doodle'] .fab-pulse { background: transparent; border: 2px dash
 html[data-theme='doodle'] .burger i { background: #fff; }
 
 /* ---------- logo ---------- */
-html[data-theme='doodle'] .logo-mark { background: #ff6a00; color: #0b0b0b; }
+/* logo brand: seperti digambar pensil di atas kertas */
+html[data-theme='doodle'] .logo-mark { background: #fff; color: var(--ink); }
+html[data-theme='doodle'] .logo-mark:has(img) {
+  background: transparent;
+  border: 2.5px solid var(--ink);
+  border-radius: 46% 54% 50% 50% / 52% 46% 54% 48%;
+  box-shadow: var(--hard-sm);
+  padding: 5px;
+  transform: rotate(-2deg);
+}
+html[data-theme='doodle'] .logo-mark img {
+  filter: grayscale(1) contrast(1.9) brightness(1.08);
+  mix-blend-mode: multiply;
+  border-radius: 40%;
+}
 
 /* ---------- match: pensil di kertas ---------- */
 html[data-theme='doodle'] .hp {

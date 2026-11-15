@@ -4,6 +4,7 @@
 // yang sama dengan di bawah (default: logo.png), lalu commit.
 // Format yang disarankan: PNG/SVG/WebP persegi, latar transparan.
 // Jika memakai format lain (misalnya logo.svg), ubah nama file di bawah.
+// Ganti ke WebP: cukup taruh file bernama sama berakhiran .webp di web/public/ (format lain otomatis dicari).
 // Jika file tidak ada, tampil huruf "Y" oranye sebagai cadangan.
 // Isi dengan null untuk selalu memakai huruf "Y".
 // ============================================================
