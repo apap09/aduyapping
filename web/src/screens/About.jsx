@@ -65,7 +65,7 @@ function FeedbackTile({ i, locked, onClick }) {
         </motion.span>
         <span className="tile-text">
           <strong>Feedback</strong>
-          <small>{locked ? 'Login dulu' : 'Kirim saran ke admin'}</small>
+          <small>{locked ? 'Login dulu' : 'Kirim saran ke developer'}</small>
         </span>
       </motion.button>
     </motion.div>
