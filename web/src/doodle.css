@@ -338,7 +338,7 @@ html[data-theme='doodle'] .rank,
 html[data-theme='doodle'] .board-row.top .rank { background: var(--ink); color: #fff; }
 html[data-theme='doodle'] .board-bar { background: var(--ink); }
 html[data-theme='doodle'] .caret { background: var(--ink); }
-html[data-theme='doodle'] .conn.online i { background: var(--ink); }
+html[data-theme='doodle'] .conn.online i { background: #22c55e; }
 html[data-theme='doodle'] .conn.connecting i,
 html[data-theme='doodle'] .conn.offline i { background: #fff; border: 2px solid var(--ink); }
 
