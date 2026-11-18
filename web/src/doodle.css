@@ -369,3 +369,20 @@ html[data-theme='doodle'] .menu-grid .cell-shop .tile-text strong,
 html[data-theme='doodle'] .menu-grid .cell-board .tile-text strong { font-size: 1.1em; }
 html[data-theme='doodle'] .board-row:not(.top) { background: #fff; }
 
+
+/* ---------- ikon mode & elemen hitam lain: isi putih supaya terlihat ---------- */
+html[data-theme='doodle'] .mode-card .mode-icon {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 50% 44% 52% 46%;
+}
+html[data-theme='doodle'] .mode-card.soon .mode-icon {
+  background: #fff;
+  color: var(--ink);
+  border: 2px dashed var(--ink);
+}
+html[data-theme='doodle'] .chat-msg.me .chat-bubble,
+html[data-theme='doodle'] .chat-send {
+  background: var(--ink);
+  color: #fff;
+}
