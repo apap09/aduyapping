@@ -11,6 +11,6 @@ export const ABOUT = {
   tagline: 'cuman game yapping biasa ajg.',
   links: [
     { id: 'instagram', label: 'Instagram', sub: 'Ikuti di Instagram', url: 'https://www.instagram.com/apap09_', icon: 'camera' },
-    { id: 'github', label: 'Repo GitHub', sub: 'aldo19271/Yappingrace', url: 'https://github.com/aldo19271/Yappingrace', icon: 'code' },
+    { id: 'github', label: 'Repo GitHub', sub: 'apap09/aduyapping', url: 'https://github.com/apap09/aduyapping', icon: 'code' },
   ],
 };
