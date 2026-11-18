@@ -3,7 +3,7 @@
 export const SHOW_COMING_SOON = true;
 
 export const MODES = [
-  { id: 'war', title: 'War Team', sub: 'Adu serangan antar tim' },
+  { id: 'war', title: 'Perang Suku', sub: 'maen team/solo terserah klean' },
 ];
 
-export const COMING_SOON = { title: 'Mode baru', sub: '.. comingsoon ..' };
+export const COMING_SOON = { title: '', sub: '.. comingsoon ..' };
