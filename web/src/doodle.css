@@ -1,6 +1,6 @@
 /* =====================================================================
-   Tema DOODLE: coretan pensil di kertas bergaris, hanya hitam & putih.
-   Aktif jika <html data-theme="doodle"> (diatur di Pengaturan > Tampilan).
+   Tema DOODLE (permanen): coretan pensil di kertas bergaris, hanya hitam & putih.
+   Aktif lewat <html data-theme="doodle"> di index.html (tidak ada lagi switch tema).
    Hanya menimpa tampilan; struktur & fungsi layar tidak berubah.
    ===================================================================== */
 html[data-theme='doodle'] {

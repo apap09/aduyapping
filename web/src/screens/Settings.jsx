@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Pencil, Volume2, VolumeX } from 'lucide-react';
+import { LogOut, Volume2, VolumeX } from 'lucide-react';
 import { useApp } from '../store.jsx';
 import { Button, Field, Modal, PasswordField, Screen, Switch, TopBar } from '../components/ui.jsx';
 import { useSound } from '../lib/sound.js';
-import { useTheme } from '../lib/theme.js';
 
 function AccountForm() {
   const { state, actions } = useApp();
@@ -89,7 +88,6 @@ function AccountForm() {
 export default function SettingsScreen() {
   const { state, actions } = useApp();
   const [soundOn, setSoundOn] = useSound();
-  const [theme, setTheme] = useTheme();
   const [confirmOut, setConfirmOut] = useState(false);
   return (
     <Screen>
@@ -115,21 +113,6 @@ export default function SettingsScreen() {
           <small>{soundOn ? 'Efek suara menyala' : 'Efek suara mati'}</small>
         </span>
         <Switch checked={soundOn} onChange={setSoundOn} label="Efek suara" />
-      </motion.div>
-      <motion.div
-        className="setting-row theme-row"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 320, damping: 24, delay: 0.05 }}
-      >
-        <span className="setting-icon">
-          <Pencil size={22} strokeWidth={2.5} />
-        </span>
-        <span className="setting-text">
-          <strong>Tampilan</strong>
-          <small>{theme === 'doodle' ? 'Doodle: coretan pensil di kertas bergaris' : 'Normal: tema gelap'}</small>
-        </span>
-        <Switch checked={theme === 'doodle'} onChange={(on) => setTheme(on ? 'doodle' : 'normal')} label="Tampilan doodle" />
       </motion.div>
       {state.user ? <AccountForm /> : null}
       <Button variant="ghost" icon={LogOut} className="logout-btn" onClick={() => setConfirmOut(true)}>
