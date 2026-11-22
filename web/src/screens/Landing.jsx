@@ -6,6 +6,7 @@ import { Button, Field, PasswordField, Screen, itemVariants, listVariants } from
 import { Marquee, Typewriter } from '../components/fx.jsx';
 import LogoMark from '../components/LogoMark.jsx';
 import ForgotForm from '../components/ForgotForm.jsx';
+import SeoContent from '../components/SeoContent.jsx';
 
 const WORDS = ['ngetik', 'kelasz', 'musuhan', 'by1', 'ez', 'yapping', 'booyah', 'sikat', 'tutor', 'empuk'];
 
@@ -48,6 +49,7 @@ export default function Landing() {
   };
 
   return (
+    <>
     <Screen className="center">
       <motion.div className="landing" variants={listVariants} initial="initial" animate="animate">
         <motion.div className="logo" variants={itemVariants}>
@@ -196,5 +198,7 @@ export default function Landing() {
       </motion.div>
       <Marquee words={WORDS} />
     </Screen>
+    <SeoContent />
+    </>
   );
 }

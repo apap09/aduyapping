@@ -386,3 +386,19 @@ html[data-theme='doodle'] .chat-send {
   background: var(--ink);
   color: #fff;
 }
+
+/* ---------- bagian "Tentang AduYapping" di bawah halaman awal (konten SEO) ---------- */
+html[data-theme='doodle'] .seo-about {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 18px 48px;
+  position: relative;
+  z-index: 1;
+}
+html[data-theme='doodle'] .seo-block { margin-bottom: 22px; }
+html[data-theme='doodle'] .seo-about h2 { font-size: 1.7em; line-height: 1.1; margin: 0 0 8px; }
+html[data-theme='doodle'] .seo-about p,
+html[data-theme='doodle'] .seo-about li { font-size: 1.05em; line-height: 28px; margin: 0; }
+html[data-theme='doodle'] .seo-about ol,
+html[data-theme='doodle'] .seo-about ul { margin: 0; padding-left: 22px; }

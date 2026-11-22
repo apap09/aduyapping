@@ -6,5 +6,5 @@ import { LOGO_SRC } from '../../config/logoabout.js';
 export default function LogoMark() {
   const [failed, setFailed] = useState(false);
   if (!LOGO_SRC || failed) return <span className="logo-fallback">Y</span>;
-  return <SmartImg src={LOGO_SRC} alt="Logo" draggable="false" onFail={() => setFailed(true)} />;
+  return <SmartImg src={LOGO_SRC} alt="Logo AduYapping" draggable="false" onFail={() => setFailed(true)} />;
 }
