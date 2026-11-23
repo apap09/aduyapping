@@ -128,6 +128,23 @@ function EmptySlot({ label, onClick, disabled }) {
   );
 }
 
+/** Tombol tambah bot (hanya ketua). */
+function AddBotButton({ disabled, onClick }) {
+  return (
+    <motion.button
+      type="button"
+      className="bot-add"
+      aria-label="Tambah bot"
+      disabled={disabled}
+      onClick={onClick}
+      whileTap={disabled ? undefined : { scale: 0.9, y: 2 }}
+    >
+      <Bot size={16} strokeWidth={2.5} />
+      <Plus size={12} strokeWidth={3.5} />
+    </motion.button>
+  );
+}
+
 function TeamPanel({ team, room, youId, canMove, onMove, isHost, dnd, canDrag, onAddBot, onBotLevel }) {
   const cap = Math.ceil(room.settings.max / 2);
   const members = room.players.filter((p) => p.team === team);
@@ -143,19 +160,7 @@ function TeamPanel({ team, room, youId, canMove, onMove, isHost, dnd, canDrag, o
       <header>
         <i />
         <h3>{name}</h3>
-        {isHost && canMove ? (
-          <motion.button
-            type="button"
-            className="bot-add"
-            aria-label="Tambah bot"
-            disabled={full}
-            onClick={() => onAddBot(team)}
-            whileTap={full ? undefined : { scale: 0.9, y: 2 }}
-          >
-            <Bot size={16} strokeWidth={2.5} />
-            <Plus size={12} strokeWidth={3.5} />
-          </motion.button>
-        ) : null}
+        {isHost && canMove ? <AddBotButton disabled={full} onClick={() => onAddBot(team)} /> : null}
         <small>
           {members.length}/{cap}
         </small>
@@ -365,7 +370,12 @@ export default function Room() {
       {solo ? (
         <DropSlot dnd={dnd && room.players.length < s.max} id="solo-list" target={{ to: 'player' }}>
           <section className="players">
-            <h3>Pemain</h3>
+            <div className="players-head">
+              <h3>Pemain</h3>
+              {isHost && !loading ? (
+                <AddBotButton disabled={room.players.length >= s.max} onClick={() => actions.addBot()} />
+              ) : null}
+            </div>
             <AnimatePresence initial={false}>
               {room.players.map((p) => (
                 <Draggable key={p.id} dnd={dnd} id={p.id} kind={p.bot ? 'bot' : 'player'} enabled={canDrag && p.id !== room.hostId}>

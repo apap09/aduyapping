@@ -437,22 +437,26 @@ export class Room extends DurableObject {
     this.pushLobby();
   }
 
-  /** Ketua menambah bot ke slot kosong pertama di sebuah tim (hanya di lobi, mode team). */
+  /** Ketua menambah bot (hanya di lobi). Mode team: ke slot kosong pertama di tim yang dipilih. Mode solo: ke daftar pemain. */
   onBotAdd(p, m) {
-    if (p.id !== this.hostId || this.status !== 'lobby' || this.settings.mode !== 'team') return;
+    if (p.id !== this.hostId || this.status !== 'lobby') return;
     const err = (message) => this.send(p.ws, { type: 'error', code: 'bot', message });
-    const team = Number(m.team);
-    if (team !== 1 && team !== 2) return;
+    const solo = this.settings.mode === 'solo';
+    const team = solo ? 0 : Number(m.team);
+    if (!solo && team !== 1 && team !== 2) return;
     const act = this.activePlayers();
     if (act.length >= this.settings.max) return err('Slot pemain penuh.');
-    let slot = -1;
-    for (let i = 0; i < this.teamCap(); i++) {
-      if (!act.some((x) => x.team === team && x.slot === i)) {
-        slot = i;
-        break;
+    let slot = 0;
+    if (!solo) {
+      slot = -1;
+      for (let i = 0; i < this.teamCap(); i++) {
+        if (!act.some((x) => x.team === team && x.slot === i)) {
+          slot = i;
+          break;
+        }
       }
+      if (slot < 0) return err('Slot tim penuh.');
     }
-    if (slot < 0) return err('Slot tim penuh.');
     const n = ++this.botSeq;
     this.players.set(`bot-${n}`, {
       id: `bot-${n}`,
