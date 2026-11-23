@@ -116,7 +116,7 @@ export default function RoomForm({ value, onChange, namePlaceholder = 'Nama room
             <Row title="Jumlah pemain" hint={value.mode === 'solo' ? 'Min 2, maks 8' : 'Min 2, maks 8 (dibagi 2 tim)'}>
               <Stepper value={value.max} min={2} max={8} onChange={(v) => set({ max: v })} />
             </Row>
-            <Row title="Timer" hint={value.timerOn === false ? 'Mati: tanpa batas waktu' : 'Waktu habis: poin (solo) / anggota hidup (team)'}>
+            <Row title="Timer" hint={value.timerOn === false ? 'better on beb' : ''}>
               <Switch checked={value.timerOn !== false} onChange={(v) => set({ timerOn: v })} label="Timer" />
             </Row>
             <AnimatePresence initial={false}>
