@@ -288,6 +288,8 @@ export function AppProvider({ children }) {
       saveSettings: (settings) => net().sendRoom({ type: 'update_settings', settings }),
       startGame: () => net().sendRoom({ type: 'start' }),
       moveTo: (body) => net().sendRoom({ type: 'move', ...body }),
+      addBot: (team) => net().sendRoom({ type: 'bot_add', team }),
+      setBotLevel: (id, level) => net().sendRoom({ type: 'bot_level', id, level }),
       sendChat: (text) => net().sendRoom({ type: 'chat', text }),
       setChatOpen: (open) => dispatch({ type: 'chat_open', open }),
       ready: () => net().sendRoom({ type: 'ready' }),

@@ -19,6 +19,15 @@ const CHAT_MAX_LEN = 120; // panjang pesan chat
 const CHAT_GAP_MS = 350; // jeda minimal antar pesan chat per pemain
 const CHAT_KEEP = 40; // jumlah pesan terakhir yang disimpan untuk pemain yang baru masuk
 
+// ---- Bot ----
+// Level bot (0 sampai 1): lembek = 0.2, biasa aja = 0.5, jago jir = 1.
+const BOT_LEVELS = [0.2, 0.5, 1];
+const BOT_DEFAULT_LEVEL = 0.5;
+const BOT_SLOWEST_MS = 3400; // jeda antar kata bot di level 0
+const BOT_SPAN_MS = 2600; // makin tinggi level, jeda makin pendek: jeda = SLOWEST - level * SPAN (level 1 = 800 ms)
+const BOT_MISS_MAX = 0.2; // peluang bot salah ketik di level 0 (makin tinggi level makin kecil)
+const BOT_SKIN = 'default'; // sama dengan skin bawaan pemain (skin pertama di web/config/skins.js)
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -39,6 +48,7 @@ export class Room extends DurableObject {
     this.players = new Map();
     this.status = 'lobby'; // lobby | loading | countdown | playing | finished
     this.orderSeq = 0;
+    this.botSeq = 0;
     this.words = [];
     this.chat = [];
     this.chatSeq = 0;
@@ -134,6 +144,22 @@ export class Room extends DurableObject {
     return Math.ceil(this.settings.max / 2);
   }
 
+  /** Pastikan ketua room masih ada dan manusia (bukan bot). Ketua boleh sedang jadi spectator. */
+  ensureHost() {
+    const cur = this.players.get(this.hostId);
+    if (cur && !cur.left && !cur.bot) return;
+    const humans = [...this.players.values()].filter((p) => !p.left && !p.bot);
+    const next = humans.filter((p) => !p.spec).sort((a, b) => a.order - b.order)[0] || humans.sort((a, b) => a.order - b.order)[0];
+    if (next) this.hostId = next.id;
+  }
+
+  /** Room tetap hidup selama masih ada pemain manusia yang bermain, atau ketua yang sedang menonton. */
+  hasHumans() {
+    if (this.activePlayers().some((p) => !p.bot)) return true;
+    const host = this.players.get(this.hostId);
+    return !!(host && host.spec && !host.left);
+  }
+
   /** Mode team: taruh pemain di tim yang lebih sedikit, di slot kosong pertama. */
   placeInTeam(p) {
     const cap = this.teamCap();
@@ -166,6 +192,8 @@ export class Room extends DurableObject {
         connected: p.connected,
         team: p.team,
         slot: p.slot,
+        bot: !!p.bot,
+        level: p.bot ? p.level : undefined,
       })),
       spectators: this.spectators().map((p) => ({
         id: p.id,
@@ -207,6 +235,10 @@ export class Room extends DurableObject {
           return this.onSettings(p, m);
         case 'move':
           return this.onMove(p, m);
+        case 'bot_add':
+          return this.onBotAdd(p, m);
+        case 'bot_level':
+          return this.onBotLevel(p, m);
         case 'start':
           return this.onStart(p);
         case 'ready':
@@ -276,7 +308,7 @@ export class Room extends DurableObject {
         return this.send(ws, { type: 'error', code: 'password_wrong', message: 'Password salah.' });
       }
     }
-    if (!asSpec && active.length === 0) this.hostId = u.id;
+    if (!asSpec && active.length === 0 && !this.players.has(this.hostId)) this.hostId = u.id;
 
     const np = {
       id: u.id,
@@ -357,13 +389,22 @@ export class Room extends DurableObject {
     this.begin();
   }
 
-  /** Pindah slot/tim, atau pindah antara pemain dan spectator (hanya di lobi). */
-  onMove(p, m) {
-    const err = (message) => this.send(p.ws, { type: 'error', code: 'move', message });
+  /**
+   * Pindah slot/tim, atau pindah antara pemain dan spectator (hanya di lobi).
+   * Ketua juga boleh memindahkan pemain/bot lain (m.id) ke slot yang KOSONG.
+   */
+  onMove(host, m) {
+    const err = (message) => this.send(host.ws, { type: 'error', code: 'move', message });
     if (this.status !== 'lobby') return err('Pertandingan sudah dimulai, tidak bisa pindah posisi.');
+    let p = host;
+    if (m.id !== undefined && m.id !== null && String(m.id) !== host.id) {
+      if (host.id !== this.hostId) return;
+      p = this.players.get(String(m.id));
+      if (!p || p.left || p.id === this.hostId) return;
+    }
     if (m.to === 'spectator') {
       if (p.spec) return;
-      if (p.id === this.hostId) return err('Ketua room tidak bisa jadi spectator.');
+      if (p.bot) return err('Cuman bisa di tim');
       if (!this.settings.specOn) return err('Spectator dimatikan di room ini.');
       if (this.spectators().length >= this.settings.specMax) return err('Slot spectator penuh.');
       p.spec = true;
@@ -394,6 +435,83 @@ export class Room extends DurableObject {
     }
     this.broadcastRoom();
     this.pushLobby();
+  }
+
+  /** Ketua menambah bot ke slot kosong pertama di sebuah tim (hanya di lobi, mode team). */
+  onBotAdd(p, m) {
+    if (p.id !== this.hostId || this.status !== 'lobby' || this.settings.mode !== 'team') return;
+    const err = (message) => this.send(p.ws, { type: 'error', code: 'bot', message });
+    const team = Number(m.team);
+    if (team !== 1 && team !== 2) return;
+    const act = this.activePlayers();
+    if (act.length >= this.settings.max) return err('Slot pemain penuh.');
+    let slot = -1;
+    for (let i = 0; i < this.teamCap(); i++) {
+      if (!act.some((x) => x.team === team && x.slot === i)) {
+        slot = i;
+        break;
+      }
+    }
+    if (slot < 0) return err('Slot tim penuh.');
+    const n = ++this.botSeq;
+    this.players.set(`bot-${n}`, {
+      id: `bot-${n}`,
+      name: `Bot ${n}`,
+      skin: BOT_SKIN,
+      guest: true, // bot tidak mendapat koin dan tidak dicatat di leaderboard
+      bot: true,
+      level: BOT_DEFAULT_LEVEL,
+      ws: null,
+      connected: true,
+      order: ++this.orderSeq,
+      team,
+      slot,
+      hp: this.settings.hp,
+      alive: true,
+      idx: 0,
+      words: 0,
+      points: 0,
+      lastWordAt: 0,
+      ready: true,
+      targetId: null,
+      left: false,
+      graceTimer: null,
+      spec: false,
+    });
+    this.broadcastRoom();
+    this.pushLobby();
+  }
+
+  /** Ketua mengatur kemampuan bot: lembek 0.2, biasa aja 0.5, jago jir 1. */
+  onBotLevel(p, m) {
+    if (p.id !== this.hostId || this.status !== 'lobby') return;
+    const bot = this.players.get(String(m.id));
+    if (!bot || !bot.bot) return;
+    const lv = Number(m.level);
+    if (!BOT_LEVELS.includes(lv)) return;
+    bot.level = lv;
+    this.broadcastRoom();
+  }
+
+  /** Bot mengetik di server: jeda antar kata dan peluang salah ditentukan oleh level. */
+  startBots(run) {
+    for (const p of this.activePlayers()) if (p.bot) this.scheduleBot(p, run, true);
+  }
+
+  scheduleBot(p, run, first = false) {
+    const base = BOT_SLOWEST_MS - p.level * BOT_SPAN_MS;
+    const wait = base * (0.8 + Math.random() * 0.4) * (first ? Math.random() * 0.5 + 0.5 : 1);
+    clearTimeout(p.botTimer);
+    p.botTimer = setTimeout(() => this.botTick(p, run), wait);
+  }
+
+  botTick(p, run) {
+    if (run !== this.runId || this.status !== 'playing' || !p.alive || p.left) return;
+    if (this.words.length > 0 && Math.random() >= (1 - p.level) * BOT_MISS_MAX) {
+      p.words++;
+      this.attack(p);
+    }
+    if (run === this.runId && this.status === 'playing' && p.alive) this.scheduleBot(p, run);
   }
 
   onReady(p) {
@@ -477,6 +595,10 @@ export class Room extends DurableObject {
           /* sudah tertutup */
         }
       }
+      if (this.hostId === id) {
+        if (!this.hasHumans()) return this.destroyRoom();
+        this.ensureHost();
+      }
       this.broadcastRoom();
       this.pushLobby();
       return;
@@ -499,9 +621,8 @@ export class Room extends DurableObject {
       }
     }
 
-    const active = this.activePlayers();
-    if (active.length === 0) return this.destroyRoom();
-    if (this.hostId === id) this.hostId = active[0].id;
+    if (!this.hasHumans()) return this.destroyRoom();
+    if (this.hostId === id) this.ensureHost();
 
     if (inGame) {
       this.broadcast({ type: 'out', id });
@@ -554,7 +675,7 @@ export class Room extends DurableObject {
       p.alive = true;
       p.idx = 0;
       p.words = 0;
-      p.ready = false;
+      p.ready = !!p.bot; // bot selalu siap
       p.targetId = null;
       p.lastWordAt = 0;
     });
@@ -577,6 +698,7 @@ export class Room extends DurableObject {
       hp: p.hp,
       alive: p.alive,
       left: p.left,
+      bot: !!p.bot,
     }));
   }
 
@@ -655,6 +777,7 @@ export class Room extends DurableObject {
     clearTimeout(this.matchTimer);
     if (ms) this.matchTimer = setTimeout(() => this.timeUp(run), ms);
     this.broadcast({ type: 'go', remainingMs: ms || null });
+    this.startBots(run);
   }
 
   resolveTarget(p) {
@@ -732,9 +855,8 @@ export class Room extends DurableObject {
       if (p.left) this.players.delete(id);
       else this.resetPlayer(p);
     }
-    const act = this.activePlayers();
-    if (act.length === 0) return this.destroyRoom();
-    if (!act.some((p) => p.id === this.hostId)) this.hostId = act[0].id;
+    if (!this.hasHumans()) return this.destroyRoom();
+    this.ensureHost();
     this.broadcast({ type: 'aborted', message });
     this.broadcastRoom();
     this.pushLobby();
@@ -813,9 +935,8 @@ export class Room extends DurableObject {
       if (p.left) this.players.delete(id);
       else this.resetPlayer(p);
     }
-    const act = this.activePlayers();
-    if (act.length === 0) return this.destroyRoom();
-    if (!act.some((p) => p.id === this.hostId)) this.hostId = act[0].id;
+    if (!this.hasHumans()) return this.destroyRoom();
+    this.ensureHost();
     this.broadcastRoom();
     this.pushLobby();
   }

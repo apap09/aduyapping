@@ -402,3 +402,25 @@ html[data-theme='doodle'] .seo-about p,
 html[data-theme='doodle'] .seo-about li { font-size: 1.05em; line-height: 28px; margin: 0; }
 html[data-theme='doodle'] .seo-about ol,
 html[data-theme='doodle'] .seo-about ul { margin: 0; padding-left: 22px; }
+
+/* ---------- bot & drag and drop di room ---------- */
+html[data-theme='doodle'] .bot-add {
+  background: #fff;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 999px 900px 999px 880px;
+  box-shadow: var(--hard-sm);
+}
+html[data-theme='doodle'] .bot-add:active:not(:disabled) { box-shadow: 0 0 0 var(--ink); transform: translate(2px, 3px); }
+html[data-theme='doodle'] .badge.bot-level { font-family: var(--sans); font-size: 15px; border: 2px solid var(--ink); }
+html[data-theme='doodle'] button.badge.bot-level { box-shadow: var(--hard-sm); }
+html[data-theme='doodle'] .dnd-overlay .player,
+html[data-theme='doodle'] .dnd-overlay .spec-chip { box-shadow: var(--hard); }
+html[data-theme='doodle'] .drop-slot.over .slot-empty,
+html[data-theme='doodle'] .drop-slot.over .spec-empty { background: var(--panel-2); border-style: solid; }
+html[data-theme='doodle'] .drop-slot.deny .slot-empty,
+html[data-theme='doodle'] .drop-slot.deny .spec-empty {
+  border-color: var(--ink);
+  background: repeating-linear-gradient(135deg, transparent 0 4px, #cfcfcf 4px 5px);
+  opacity: 1;
+}

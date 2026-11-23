@@ -2386,3 +2386,26 @@ p {
 .sticky-actions.row2 { display: flex; flex-direction: row; gap: 10px; width: 100%; }
 .sticky-actions.row2 > * { flex: 1; }
 :root { --ok-green: #2fbf71; --chart-ok: #22c55e; --chart-bad: #ef4444; }
+
+/* ---------- bot & drag and drop di room ---------- */
+.bot-add {
+  display: inline-flex; align-items: center; gap: 1px; height: 30px; padding: 0 8px;
+  border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--text); cursor: pointer;
+}
+.bot-add:disabled { opacity: 0.4; cursor: default; }
+.badge.bot-level { border: 0; font-family: inherit; cursor: default; }
+button.badge.bot-level { cursor: pointer; }
+.dnd-item { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+.dnd-item.can-drag { cursor: grab; }
+.dnd-item img { pointer-events: none; -webkit-touch-callout: none; }
+.dnd-item.dragging { opacity: 0.35; }
+.dnd-overlay { cursor: grabbing; pointer-events: none; transform: rotate(2deg) scale(1.03); }
+.drop-slot { display: block; border-radius: 14px; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+.spec-slots > .drop-slot { display: flex; }
+.drop-slot.armed:not(.over) .slot-empty,
+.drop-slot.armed:not(.over) .spec-empty { border-color: var(--orange); }
+.drop-slot.over { transform: scale(1.03); }
+.drop-slot.over .slot-empty,
+.drop-slot.over .spec-empty { border-style: solid; background: var(--panel-2); }
+.drop-slot.deny .slot-empty,
+.drop-slot.deny .spec-empty { border-color: var(--red); opacity: 0.6; }
