@@ -2416,3 +2416,23 @@ button.badge.bot-level { cursor: pointer; }
 .drop-slot.over .spec-empty { border-style: solid; background: var(--panel-2); }
 .drop-slot.deny .slot-empty,
 .drop-slot.deny .spec-empty { border-color: var(--red); opacity: 0.6; }
+
+/* ---------- titik tiga & menu fold down di kartu player (ketua) ---------- */
+.player { position: relative; }
+.member-more {
+  position: absolute; top: 2px; right: 4px; width: 32px; height: 28px;
+  display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px;
+  background: transparent; color: var(--text); cursor: pointer;
+}
+.player.has-menu .badge { align-self: flex-end; }
+.fold-menu {
+  position: fixed; z-index: 1000; min-width: 190px; padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+}
+.fold-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px;
+  border: 0; border-radius: 8px; background: transparent; color: var(--text);
+  font: inherit; font-weight: 700; text-align: left; cursor: pointer;
+}
+.fold-item:hover { background: var(--panel-2); }

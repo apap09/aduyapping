@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -12,7 +12,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Bot, Check, Copy, Crown, Eye, LogOut, Play, Plus, Settings } from 'lucide-react';
+import { Bot, Check, Copy, Crown, EllipsisVertical, Eye, LogOut, Play, Plus, Settings, UserX } from 'lucide-react';
 import { BOT_LEVELS, BOT_TEAM_ONLY, DRAG_HOLD_MS, DRAG_TOLERANCE } from '../../config/bot.js';
 import { useApp } from '../store.jsx';
 import Avatar from '../components/Avatar.jsx';
@@ -53,11 +53,128 @@ function BotLevel({ p, canEdit, onLevel }) {
   );
 }
 
-function Member({ p, room, youId, isHost, onBotLevel, still }) {
+/** Titik tiga di kartu player (hanya ketua): menu fold down "Transfer Ketua" dan "Kick Player". */
+const MENU_HEIGHT = 110; // perkiraan tinggi menu, untuk menentukan buka ke bawah atau ke atas
+
+function MemberMenu({ p, onTransfer, onKick }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const btnRef = useRef(null);
+  const menuRef = useRef(null);
+  const close = () => setOpen(false);
+  // berhenti di sini supaya mengetuk tombol/menu ini tidak ikut memulai drag kartu
+  const stop = (e) => e.stopPropagation();
+
+  const toggle = () => {
+    if (open) return close();
+    const r = btnRef.current.getBoundingClientRect();
+    const below = window.innerHeight - r.bottom;
+    const up = below < MENU_HEIGHT + 16 && r.top > below;
+    setPos({
+      up,
+      right: Math.max(8, window.innerWidth - r.right),
+      top: up ? undefined : r.bottom + 6,
+      bottom: up ? window.innerHeight - r.top + 6 : undefined,
+    });
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if ((menuRef.current && menuRef.current.contains(e.target)) || (btnRef.current && btnRef.current.contains(e.target))) return;
+      close();
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') close();
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [open]);
+
+  const hide = pos && pos.up ? 6 : -6;
+  return (
+    <>
+      <motion.button
+        ref={btnRef}
+        type="button"
+        className={`member-more ${open ? 'open' : ''}`}
+        aria-label="Menu"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onPointerDown={stop}
+        onMouseDown={stop}
+        onTouchStart={stop}
+        onClick={toggle}
+        whileTap={{ scale: 0.88, y: 1 }}
+      >
+        <EllipsisVertical size={18} strokeWidth={3} />
+      </motion.button>
+      {createPortal(
+        <AnimatePresence>
+          {open && pos ? (
+            <motion.div
+              ref={menuRef}
+              role="menu"
+              className="fold-menu"
+              style={{ right: pos.right, top: pos.top, bottom: pos.bottom, transformOrigin: pos.up ? 'bottom right' : 'top right' }}
+              initial={{ opacity: 0, scaleY: 0.5, y: hide }}
+              animate={{ opacity: 1, scaleY: 1, y: 0 }}
+              exit={{ opacity: 0, scaleY: 0.5, y: hide }}
+              transition={{ type: 'spring', stiffness: 520, damping: 32 }}
+              onPointerDown={stop}
+              onMouseDown={stop}
+              onTouchStart={stop}
+            >
+              {!p.bot ? (
+                <motion.button
+                  type="button"
+                  role="menuitem"
+                  className="fold-item"
+                  whileTap={{ scale: 0.96, y: 1 }}
+                  onClick={() => {
+                    close();
+                    onTransfer(p.id);
+                  }}
+                >
+                  <Crown size={16} strokeWidth={2.5} /> Transfer Ketua
+                </motion.button>
+              ) : null}
+              <motion.button
+                type="button"
+                role="menuitem"
+                className="fold-item"
+                whileTap={{ scale: 0.96, y: 1 }}
+                onClick={() => {
+                  close();
+                  onKick(p.id);
+                }}
+              >
+                <UserX size={16} strokeWidth={2.5} /> Kick Player
+              </motion.button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+function Member({ p, room, youId, isHost, onBotLevel, onKick, onTransfer, still }) {
+  const manage = !!isHost && !still && room.status === 'lobby' && p.id !== room.hostId;
   return (
     <motion.div
       layout
-      className={`player ${p.connected ? '' : 'away'}`}
+      className={`player ${p.connected ? '' : 'away'} ${manage ? 'has-menu' : ''}`}
       initial={still ? false : { opacity: 0, x: -40, scale: 0.85, rotate: -2 }}
       animate={{ opacity: 1, x: 0, scale: 1, rotate: 0 }}
       exit={{ opacity: 0, x: 40, scale: 0.9 }}
@@ -76,6 +193,7 @@ function Member({ p, room, youId, isHost, onBotLevel, still }) {
         </span>
       ) : null}
       {!p.connected ? <span className="badge dim">Terputus</span> : null}
+      {manage ? <MemberMenu p={p} onTransfer={onTransfer} onKick={onKick} /> : null}
     </motion.div>
   );
 }
@@ -145,12 +263,12 @@ function AddBotButton({ disabled, onClick }) {
   );
 }
 
-function TeamPanel({ team, room, youId, canMove, onMove, isHost, dnd, canDrag, onAddBot, onBotLevel }) {
+function TeamPanel({ team, room, youId, canMove, onMove, isHost, dnd, canDrag, onAddBot, onBotLevel, onKick, onTransfer }) {
   const cap = Math.ceil(room.settings.max / 2);
   const members = room.players.filter((p) => p.team === team);
   const name = (room.settings.teamNames || [])[team - 1] || (team === 1 ? 'Tim Merah' : 'Tim Biru');
   const slots = Array.from({ length: cap }, (_, i) => members.find((p) => p.slot === i) || null);
-  const full = slots.every(Boolean) || room.players.length >= room.settings.max;
+  const full = slots.every(Boolean); // tombol bot aktif selama tim ini masih punya slot kosong
   return (
     <motion.section
       className={`team-panel ${team === 1 ? 'red' : 'blue'}`}
@@ -168,7 +286,7 @@ function TeamPanel({ team, room, youId, canMove, onMove, isHost, dnd, canDrag, o
       {slots.map((p, i) =>
         p ? (
           <Draggable key={p.id} dnd={dnd} id={p.id} kind={p.bot ? 'bot' : 'player'} enabled={canDrag && p.id !== room.hostId}>
-            <Member p={p} room={room} youId={youId} isHost={isHost} onBotLevel={onBotLevel} />
+            <Member p={p} room={room} youId={youId} isHost={isHost} onBotLevel={onBotLevel} onKick={onKick} onTransfer={onTransfer} />
           </Draggable>
         ) : (
           <DropSlot key={`e${i}`} dnd={dnd} id={`slot-${team}-${i}`} target={{ to: 'player', team, slot: i }}>
@@ -379,7 +497,15 @@ export default function Room() {
             <AnimatePresence initial={false}>
               {room.players.map((p) => (
                 <Draggable key={p.id} dnd={dnd} id={p.id} kind={p.bot ? 'bot' : 'player'} enabled={canDrag && p.id !== room.hostId}>
-                  <Member p={p} room={room} youId={state.youId} isHost={isHost} onBotLevel={actions.setBotLevel} />
+                  <Member
+                    p={p}
+                    room={room}
+                    youId={state.youId}
+                    isHost={isHost}
+                    onBotLevel={actions.setBotLevel}
+                    onKick={actions.kickPlayer}
+                    onTransfer={actions.transferHost}
+                  />
                 </Draggable>
               ))}
             </AnimatePresence>
@@ -407,6 +533,8 @@ export default function Room() {
               canDrag={canDrag}
               onAddBot={actions.addBot}
               onBotLevel={actions.setBotLevel}
+              onKick={actions.kickPlayer}
+              onTransfer={actions.transferHost}
             />
           ))}
         </>

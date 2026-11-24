@@ -239,6 +239,10 @@ export class Room extends DurableObject {
           return this.onBotAdd(p, m);
         case 'bot_level':
           return this.onBotLevel(p, m);
+        case 'kick':
+          return this.onKick(p, m);
+        case 'transfer_host':
+          return this.onTransferHost(p, m);
         case 'start':
           return this.onStart(p);
         case 'ready':
@@ -445,7 +449,8 @@ export class Room extends DurableObject {
     const team = solo ? 0 : Number(m.team);
     if (!solo && team !== 1 && team !== 2) return;
     const act = this.activePlayers();
-    if (act.length >= this.settings.max) return err('Slot pemain penuh.');
+    // Mode solo: kapasitas = batas pemain. Mode team: selama tim itu masih punya slot kosong.
+    if (solo && act.length >= this.settings.max) return err('Slot pemain penuh.');
     let slot = 0;
     if (!solo) {
       slot = -1;
@@ -482,6 +487,31 @@ export class Room extends DurableObject {
       graceTimer: null,
       spec: false,
     });
+    this.broadcastRoom();
+    this.pushLobby();
+  }
+
+  /** Ketua mengeluarkan pemain atau bot dari room (hanya di lobi). */
+  onKick(p, m) {
+    if (p.id !== this.hostId || this.status !== 'lobby') return;
+    const t = this.players.get(String(m.id));
+    if (!t || t.left || t.id === this.hostId) return;
+    if (t.bot) {
+      this.players.delete(t.id);
+      this.broadcastRoom();
+      this.pushLobby();
+      return;
+    }
+    this.send(t.ws, { type: 'kicked' });
+    this.removePlayer(t.id);
+  }
+
+  /** Ketua menyerahkan jabatan ketua ke pemain manusia lain (hanya di lobi). */
+  onTransferHost(p, m) {
+    if (p.id !== this.hostId || this.status !== 'lobby') return;
+    const t = this.players.get(String(m.id));
+    if (!t || t.left || t.bot || t.id === this.hostId) return;
+    this.hostId = t.id;
     this.broadcastRoom();
     this.pushLobby();
   }

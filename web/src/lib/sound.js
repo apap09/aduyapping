@@ -10,6 +10,13 @@ let ctx = null;
 const buffers = {}; // name -> AudioBuffer
 const failed = {}; // name -> true jika file tidak ada / gagal didecode
 const fallback = {}; // name -> <audio>, dipakai hanya jika Web Audio belum siap
+const playing = {}; // name -> Set suara yang sedang berbunyi (agar bisa dihentikan dengan stopSound)
+
+function track(name, stop) {
+  const item = { stop };
+  (playing[name] || (playing[name] = new Set())).add(item);
+  return () => playing[name] && playing[name].delete(item);
+}
 
 function readPref() {
   try {
@@ -93,6 +100,8 @@ function playFallback(name) {
     }
     const clip = fallback[name].cloneNode();
     clip.volume = Math.min(1, Math.max(0, cfg.volume ?? 1));
+    const untrack = track(name, () => clip.pause());
+    clip.addEventListener('ended', untrack);
     const p = clip.play();
     if (p && p.catch) p.catch(() => {});
   } catch {
@@ -116,6 +125,8 @@ export function playSound(name) {
       gain.gain.value = Math.min(1, Math.max(0, cfg.volume ?? 1));
       src.connect(gain);
       gain.connect(c.destination);
+      const untrack = track(name, () => src.stop());
+      src.onended = untrack;
       src.start(0);
     } catch {
       /* abaikan */
@@ -123,6 +134,20 @@ export function playSound(name) {
     return;
   }
   playFallback(name); // belum selesai dimuat
+}
+
+/** Hentikan suara yang sedang berbunyi (mis. suara menang/kalah saat pemain keluar dari halaman hasil). */
+export function stopSound(name) {
+  const set = playing[name];
+  if (!set) return;
+  [...set].forEach((item) => {
+    try {
+      item.stop();
+    } catch {
+      /* sudah berhenti */
+    }
+  });
+  set.clear();
 }
 
 /**

@@ -424,3 +424,26 @@ html[data-theme='doodle'] .drop-slot.deny .spec-empty {
   background: repeating-linear-gradient(135deg, transparent 0 4px, #cfcfcf 4px 5px);
   opacity: 1;
 }
+
+/* ---------- titik tiga & menu fold down di kartu player (ketua) ---------- */
+html[data-theme='doodle'] .member-more { color: var(--ink); border-radius: 999px 900px 999px 880px; }
+html[data-theme='doodle'] .member-more:hover,
+html[data-theme='doodle'] .member-more.open { background: var(--panel-2); }
+html[data-theme='doodle'] .fold-menu {
+  background: #fff;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--wob-b);
+  box-shadow: var(--hard);
+  padding: 4px;
+  gap: 0;
+}
+html[data-theme='doodle'] .fold-item {
+  font-family: var(--sans);
+  font-size: 17px;
+  color: var(--ink);
+  border-radius: 6px 10px 6px 9px;
+}
+html[data-theme='doodle'] .fold-item + .fold-item { border-top: 2px dashed var(--ink); border-radius: 0 0 6px 9px; }
+html[data-theme='doodle'] .fold-item:hover,
+html[data-theme='doodle'] .fold-item:active { background: var(--ink); color: #fff; }

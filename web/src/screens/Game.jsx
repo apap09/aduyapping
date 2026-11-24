@@ -5,7 +5,7 @@ import { useApp } from '../store.jsx';
 import { api } from '../lib/api.js';
 import Avatar from '../components/Avatar.jsx';
 import { BrokenCrown, Burst, Confetti, CountUp } from '../components/fx.jsx';
-import { playSound } from '../lib/sound.js';
+import { playSound, stopSound } from '../lib/sound.js';
 import { ChatButton, ChatSheet } from '../components/Chat.jsx';
 import { Button, HpBar } from '../components/ui.jsx';
 
@@ -91,6 +91,11 @@ function Result({ g, onBack, user }) {
 
   useEffect(() => {
     playSound(won ? 'win' : 'lose');
+    // pemain keluar dari halaman hasil: suara menang/kalah langsung berhenti
+    return () => {
+      stopSound('win');
+      stopSound('lose');
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

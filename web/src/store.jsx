@@ -186,6 +186,10 @@ export function AppProvider({ children }) {
             return dispatch({ type: 'chat_msg', msg: m });
           case 'chat_history':
             return dispatch({ type: 'chat_history', messages: Array.isArray(m.messages) ? m.messages : [] });
+          case 'kicked':
+            net.leaveRoom();
+            dispatch({ type: 'toast', text: 'Kamu dikeluarkan dari room.' });
+            return dispatch({ type: 'left' });
           case 'settings_saved':
             return dispatch({ type: 'toast', text: 'Pengaturan disimpan.' });
           case 'error':
@@ -290,6 +294,8 @@ export function AppProvider({ children }) {
       moveTo: (body) => net().sendRoom({ type: 'move', ...body }),
       addBot: (team) => net().sendRoom({ type: 'bot_add', team }),
       setBotLevel: (id, level) => net().sendRoom({ type: 'bot_level', id, level }),
+      kickPlayer: (id) => net().sendRoom({ type: 'kick', id }),
+      transferHost: (id) => net().sendRoom({ type: 'transfer_host', id }),
       sendChat: (text) => net().sendRoom({ type: 'chat', text }),
       setChatOpen: (open) => dispatch({ type: 'chat_open', open }),
       ready: () => net().sendRoom({ type: 'ready' }),
