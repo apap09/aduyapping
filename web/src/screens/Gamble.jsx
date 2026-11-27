@@ -134,7 +134,7 @@ export default function Gamble() {
         <motion.div className="card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <Field
             label="Taruhan brp deck?"
-            hint={`Koin kamu: ${coins}`}
+            hint={`Koin lu: ${coins}`}
             type="number"
             inputMode="numeric"
             min={1}
