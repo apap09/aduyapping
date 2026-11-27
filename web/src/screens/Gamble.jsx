@@ -108,7 +108,7 @@ export default function Gamble() {
   if (step === 'play' && session) {
     return (
       <Screen>
-        <TopBar title="Roulette Ga seh?" />
+        <TopBar title="Roulette ni dec" />
         <GamblePlay
           session={session}
           onResult={(r) => { setRes(r); setStep('spin'); }}
@@ -121,7 +121,7 @@ export default function Gamble() {
   if (step === 'spin' && res) {
     return (
       <Screen>
-        <TopBar title="Roulette Ga seh?" />
+        <TopBar title="Roulette ni dec" />
         <RouletteWheel
           result={res.result}
           onDone={() => actions.setUser(res.user)}
