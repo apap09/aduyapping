@@ -11,11 +11,11 @@ import { DEFAULT_SKIN } from '../../config/skins.js';
 import { GAMBLING_TAPS, GAMBLING_TAP_WINDOW_MS, GAMBLING_TOAST } from '../../config/gambling.js';
 
 const TIPS = [
-  'Tips: Tap avatar musuh untuk memilih target serangan.',
-  'Tips: Kata salah berwarna merah. Hapus dulu sebelum spasi.',
-  'Tips: Spasi saat kata salah akan melewati kata tanpa damage.',
-  'Tips: Menang dapat 10 koin, kalah 5 koin.',
-  'Tips: Combo kata benar beruntun bikin kamu makin panas.',
+  'Tips: bacotin dulu musuhny biar panas',
+  'Tips: kalo kata salah di coret ati²',
+  'Tips: saran klo panas kalungin kulkas dec',
+  'Tips: sori ga ada tips buat bot',
+  'Tips: banyakin yapping biar jago :v',
 ];
 
 const WORDS = ['ngetik', 'ngatos', 'temenan', 'opoyo', 'ez', 'mayan', 'by1', 'gampang'];
