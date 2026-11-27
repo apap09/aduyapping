@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Coins, DoorOpen, Info, Keyboard, Lock, PlusSquare, ShoppingBag, Trophy, Settings, ShieldCheck, Dices } from 'lucide-react';
+import { Coins, DoorOpen, Info, Keyboard, Lock, PlusSquare, ShoppingBag, Trophy, Settings, ShieldCheck } from 'lucide-react';
 import { useApp } from '../store.jsx';
 import Avatar from '../components/Avatar.jsx';
+import ShushIcon from '../components/ShushIcon.jsx';
 import FabFan from '../components/FabFan.jsx';
 import { CountUp, Marquee, useRipple } from '../components/fx.jsx';
 import { Screen, itemVariants, listVariants } from '../components/ui.jsx';
@@ -90,7 +91,7 @@ export default function Menu() {
     taps.current = [];
     if (!user) return actions.toast('Login dulu ajg biar kebuka.');
     actions.toast(
-      <span className="toast-icon"><Dices size={18} strokeWidth={2.5} /> {GAMBLING_TOAST}</span>,
+      <span className="toast-icon"><ShushIcon size={22} /> {GAMBLING_TOAST}</span>,
     );
     return actions.go('gamble');
   };
