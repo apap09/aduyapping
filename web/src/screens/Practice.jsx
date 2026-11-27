@@ -144,6 +144,7 @@ function Run({ cfg, onDone }) {
         </span>
       </div>
       <div className="arena practice-arena">
+        <div className="words">
         <motion.div
           key={idx}
           className={`word-current ${bad ? 'bad' : ''}`}
@@ -161,6 +162,7 @@ function Run({ cfg, onDone }) {
           {words.slice(idx + 1, idx + 5).map((w, i) => (
             <span key={`${idx}-${i}`}>{w}</span>
           ))}
+        </div>
         </div>
       </div>
       <div className="sticky-actions">

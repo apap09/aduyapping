@@ -27,6 +27,7 @@ export const WORD_COUNT = 20; // jumlah kata yang harus diketik (tidak bisa diat
 export const CHANCE_PER_WORD = 5; // tiap 1 kata benar menambah peluang berhasil sebesar ini (persen)
 
 // ---- Server saja ----
+export const MIN_BET = 20; // taruhan minimum (koin)
 export const MAX_BET = 100_000_000; // batas taruhan, supaya hadiah tidak melebihi batas angka database
 // Batas kecepatan mengetik yang masuk akal (karakter per detik, termasuk spasi).
 // Klaim jumlah kata benar yang melebihi batas ini dipotong oleh server. Naikkan jika pemain cepat merasa dirugikan.

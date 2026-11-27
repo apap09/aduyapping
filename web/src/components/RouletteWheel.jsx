@@ -20,7 +20,8 @@ function arc(a0, a1) {
 // Hasil sudah diputuskan server; roda hanya menampilkannya.
 export default function RouletteWheel({ result, onDone, onExit }) {
   const { won, chance, payout, mult } = result;
-  const [revealed, setRevealed] = useState(false);
+  const [phase, setPhase] = useState('idle'); // idle | spin | done
+  const revealed = phase === 'done';
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
   const split = chance * 3.6;
@@ -36,18 +37,24 @@ export default function RouletteWheel({ result, onDone, onExit }) {
   }, [won, split]);
 
   useEffect(() => {
+    if (phase !== 'spin') return undefined;
     const t = setTimeout(() => {
-      setRevealed(true);
+      setPhase('done');
       playSound(won ? 'win' : 'lose');
       doneRef.current();
     }, SPIN_MS + 150);
-    return () => {
-      clearTimeout(t);
+    return () => clearTimeout(t);
+  }, [phase, won]);
+
+  // keluar sebelum/selama roulette: hasil sudah dibayar server, saldo tetap disinkronkan
+  useEffect(
+    () => () => {
       stopSound('win');
       stopSound('lose');
       doneRef.current();
-    };
-  }, [won]);
+    },
+    [],
+  );
 
   return (
     <div className="roulette">
@@ -58,7 +65,7 @@ export default function RouletteWheel({ result, onDone, onExit }) {
           className="roulette-wheel"
           viewBox="0 0 200 200"
           initial={{ rotate: 0 }}
-          animate={{ rotate: turn }}
+          animate={{ rotate: phase === 'idle' ? 0 : turn }}
           transition={{ duration: SPIN_MS / 1000, ease: [0.12, 0.75, 0.15, 1] }}
         >
           <defs>
@@ -78,8 +85,19 @@ export default function RouletteWheel({ result, onDone, onExit }) {
             </>
           )}
           <circle cx={R} cy={R} r={R - 1.5} fill="none" stroke="#111" strokeWidth="3" />
-          <circle cx={R} cy={R} r="14" fill="#fff" stroke="#111" strokeWidth="3" />
         </motion.svg>
+        <motion.button
+          type="button"
+          className="roulette-hub"
+          aria-label="Putar roulette"
+          disabled={phase !== 'idle'}
+          onClick={() => setPhase('spin')}
+          animate={phase === 'idle' ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+          transition={phase === 'idle' ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+          whileTap={phase === 'idle' ? { scale: 0.88, y: 3 } : undefined}
+        >
+          PUTAR
+        </motion.button>
       </div>
       <div className="roulette-legend">
         <span><i className="sw win" /> Gandain {chance}%</span>
@@ -97,7 +115,7 @@ export default function RouletteWheel({ result, onDone, onExit }) {
             {onExit}
           </motion.div>
         ) : (
-          <p className="note center-text">muter dulu...</p>
+          <p className="note center-text">{phase === 'idle' ? 'tekan bulatan di tengah buat muter' : 'muter dulu...'}</p>
         )}
       </div>
     </div>

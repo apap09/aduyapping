@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto';
 import { getSql } from './db.js';
 import { publicUser, send, fail } from './auth.js';
 import { pickWords } from '../../config/practiceWords.js';
-import { CHANCE_PER_WORD, MAX_BET, MAX_CHARS_PER_SEC, MULTIPLIERS, WORD_COUNT } from '../../config/gambling.js';
+import { CHANCE_PER_WORD, MAX_BET, MIN_BET, MAX_CHARS_PER_SEC, MULTIPLIERS, WORD_COUNT } from '../../config/gambling.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const INT_MAX = 2147483647;
@@ -77,7 +77,7 @@ const resultOf = (row) => ({
 async function start(res, auth, body) {
   const bet = Number(body.bet);
   const opt = MULTIPLIERS.find((m) => m.mult === Number(body.mult));
-  if (!Number.isInteger(bet) || bet < 1 || bet > MAX_BET || !opt) {
+  if (!Number.isInteger(bet) || bet < MIN_BET || bet > MAX_BET || !opt) {
     return send(res, 400, { error: 'Taruhan tidak valid.' });
   }
   const sql = getSql();

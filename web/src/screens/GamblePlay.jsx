@@ -77,6 +77,7 @@ export default function GamblePlay({ session, onResult, onFail }) {
         <span className="chip">peluang {Math.min(100, ok * CHANCE_PER_WORD)}%</span>
       </div>
       <div className="arena practice-arena">
+        <div className="words">
         <motion.div
           key={idx}
           className={`word-current ${bad ? 'bad' : ''}`}
@@ -92,6 +93,7 @@ export default function GamblePlay({ session, onResult, onFail }) {
           {words.slice(idx + 1, idx + 5).map((w, i) => (
             <span key={`${idx}-${i}`}>{w}</span>
           ))}
+        </div>
         </div>
       </div>
       <div className="sticky-actions">

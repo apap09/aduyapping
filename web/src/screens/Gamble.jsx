@@ -6,14 +6,23 @@ import { api } from '../lib/api.js';
 import RouletteWheel from '../components/RouletteWheel.jsx';
 import GamblePlay from './GamblePlay.jsx';
 import { Button, Field, Screen, Tabs, TopBar, itemVariants, listVariants } from '../components/ui.jsx';
-import { COMING_SOON, GAMBLING_MODES, MAX_BET, MULTIPLIERS, SHOW_COMING_SOON } from '../../config/gambling.js';
+import { COMING_SOON, GAMBLING_MODES, MAX_BET, MIN_BET, MULTIPLIERS, SHOW_COMING_SOON } from '../../config/gambling.js';
 
 function RouletteIcon({ size = 26 }) {
+  // roda keberuntungan: roda bersegmen + jarum + penyangga
+  const spokes = [0, 45, 90, 135].map((a) => {
+    const r = (a * Math.PI) / 180;
+    const dx = 7.2 * Math.cos(r);
+    const dy = 7.2 * Math.sin(r);
+    return `M${12 - dx} ${11 - dy}L${12 + dx} ${11 + dy}`;
+  });
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="9.5" />
-      <circle cx="12" cy="12" r="2.5" />
-      <path d="M12 2.5v6M12 15.5v6M2.5 12h6M15.5 12h6" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="11" r="7.5" />
+      <circle cx="12" cy="11" r="1.6" fill="currentColor" />
+      <path d={spokes.join('')} />
+      <path d="M12 1.2l-1.6 2.6h3.2z" fill="currentColor" />
+      <path d="M8 21.5l4-4.2 4 4.2M7 21.5h10" />
     </svg>
   );
 }
@@ -72,7 +81,7 @@ export default function Gamble() {
 
   const betNum = Number(bet);
   const max = Math.min(coins, MAX_BET);
-  const invalid = !Number.isInteger(betNum) || betNum < 1 || betNum > max;
+  const invalid = !Number.isInteger(betNum) || betNum < MIN_BET || betNum > max;
   const tabs = MULTIPLIERS.map((m) => ({ id: String(m.mult), label: `x${m.mult} · ${m.seconds}s` }));
 
   const start = async () => {
@@ -137,7 +146,7 @@ export default function Gamble() {
             hint={`Koin lu: ${coins}`}
             type="number"
             inputMode="numeric"
-            min={1}
+            min={MIN_BET}
             max={max}
             value={bet}
             placeholder="min 20 koin bre"
