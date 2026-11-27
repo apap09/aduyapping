@@ -10,7 +10,7 @@ export const GAMBLING_TAP_WINDOW_MS = 1500; // jeda maksimal antar tap, lewat da
 export const GAMBLING_TOAST = 'Gambling Room'; // teks notif saat berhasil masuk (ikon lucide ada di Menu.jsx)
 
 // Daftar mode di halaman pilih mode.
-export const GAMBLING_MODES = [{ id: 'roulette', title: 'Roulette sini dec', sub: '' }];
+export const GAMBLING_MODES = [{ id: 'roulette', title: 'Roulette sini dec', sub: 'duit mu bisa digandain tergantung seberapa banyak kau ngetik' }];
 
 // Ganti true / false untuk menampilkan atau menyembunyikan kartu "nyusul....".
 export const SHOW_COMING_SOON = true;
