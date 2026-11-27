@@ -139,7 +139,7 @@ export default function Gamble() {
   if (step === 'bet') {
     return (
       <Screen>
-        <TopBar title="Roulette Ga seh?" onBack={() => setStep('mode')} />
+        <TopBar title="Roulette ni dec" onBack={() => setStep('mode')} />
         <motion.div className="card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <Field
             label="Taruhan brp deck?"
