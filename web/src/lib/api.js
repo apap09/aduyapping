@@ -57,6 +57,9 @@ export const api = {
   me: () => request('/me'),
   shop: () => request('/shop'),
   buy: (skinId) => request('/shop/buy', { method: 'POST', body: { skinId } }),
+  // Gambling Room (memakai endpoint /shop/buy)
+  gambleStart: (bet, mult) => request('/shop/buy', { method: 'POST', body: { action: 'gamble_start', bet, mult } }),
+  gambleFinish: (id, correct) => request('/shop/buy', { method: 'POST', body: { action: 'gamble_finish', id, correct } }),
   equip: (skinId) => request('/shop/equip', { method: 'POST', body: { skinId } }),
   leaderboard: (bust) => request('/leaderboard' + (bust ? '?t=' + bust : '')),
   admin: (body) => request('/admin', { method: 'POST', body }),

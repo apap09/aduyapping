@@ -14,6 +14,7 @@ import About from './screens/About.jsx';
 import Practice from './screens/Practice.jsx';
 import Admin from './screens/Admin.jsx';
 import SettingsScreen from './screens/Settings.jsx';
+import Gamble from './screens/Gamble.jsx';
 
 export default function App() {
   const { state } = useApp();
@@ -28,6 +29,7 @@ export default function App() {
 
   let screen = state.screen;
   if ((screen === 'shop' || screen === 'leaderboard') && !state.user) screen = 'menu';
+  if (screen === 'gamble' && !state.user) screen = 'menu';
   if (screen === 'admin' && !(state.user && state.user.admin)) screen = 'menu';
   if (screen === 'room' && !state.room) screen = 'menu';
   if (screen === 'game' && !state.game) screen = state.room ? 'room' : 'menu';
@@ -45,6 +47,7 @@ export default function App() {
     practice: <Practice key="practice" />,
     admin: <Admin key="admin" />,
     settings: <SettingsScreen key="settings" />,
+    gamble: <Gamble key="gamble" />,
   };
 
   return (

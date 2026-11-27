@@ -1,12 +1,16 @@
 import { getSql } from '../_lib/db.js';
 import { getAuth, publicUser, send, fail } from '../_lib/auth.js';
 import { SKINS } from '../../config/skins.js';
+import { handleGamble } from '../_lib/gamble.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
   try {
     const auth = getAuth(req);
     if (!auth) return send(res, 401, { error: 'Belum login.' });
+    // Gambling Room memakai endpoint ini juga (action "gamble_..."), supaya jumlah Vercel Functions tidak bertambah.
+    const act = (req.body || {}).action;
+    if (typeof act === 'string' && act.startsWith('gamble_')) return handleGamble(res, auth, req.body);
     const skin = SKINS.find((s) => s.id === (req.body || {}).skinId);
     if (!skin || skin.price <= 0) return send(res, 400, { error: 'Skin tidak bisa dibeli.' });
 

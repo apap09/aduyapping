@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Coins, DoorOpen, Info, Keyboard, Lock, PlusSquare, ShoppingBag, Trophy, Settings, ShieldCheck } from 'lucide-react';
+import { Coins, DoorOpen, Info, Keyboard, Lock, PlusSquare, ShoppingBag, Trophy, Settings, ShieldCheck, Dices } from 'lucide-react';
 import { useApp } from '../store.jsx';
 import Avatar from '../components/Avatar.jsx';
 import FabFan from '../components/FabFan.jsx';
 import { CountUp, Marquee, useRipple } from '../components/fx.jsx';
 import { Screen, itemVariants, listVariants } from '../components/ui.jsx';
 import { DEFAULT_SKIN } from '../../config/skins.js';
+import { GAMBLING_TAPS, GAMBLING_TAP_WINDOW_MS, GAMBLING_TOAST } from '../../config/gambling.js';
 
 const TIPS = [
   'Tips: Tap avatar musuh untuk memilih target serangan.',
@@ -81,6 +82,19 @@ export default function Menu() {
   const name = user ? user.name : me ? me.name : 'menghubungkan...';
   const skin = user ? user.skin : DEFAULT_SKIN;
 
+  const taps = useRef([]);
+  const tapAvatar = () => {
+    const now = Date.now();
+    taps.current = [...taps.current.filter((t) => now - t < GAMBLING_TAP_WINDOW_MS), now];
+    if (taps.current.length < GAMBLING_TAPS) return;
+    taps.current = [];
+    if (!user) return actions.toast('Login dulu ajg biar kebuka.');
+    actions.toast(
+      <span className="toast-icon"><Dices size={18} strokeWidth={2.5} /> {GAMBLING_TOAST}</span>,
+    );
+    return actions.go('gamble');
+  };
+
   const needLogin = (screen) =>
     user ? actions.go(screen) : actions.toast('Login dulu ajg biar kebuka.');
 
@@ -92,7 +106,7 @@ export default function Menu() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 340, damping: 24 }}
       >
-        <motion.div whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }} whileTap={{ y: -14 }}>
+        <motion.div onClick={tapAvatar} whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }} whileTap={{ y: -14 }}>
           <Avatar skin={skin} size={52} />
         </motion.div>
         <div className="profile-text">
