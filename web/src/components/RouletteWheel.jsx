@@ -100,13 +100,13 @@ export default function RouletteWheel({ result, onDone, onExit }) {
         </motion.button>
       </div>
       <div className="roulette-legend">
-        <span><i className="sw win" /> Gandain {chance}%</span>
-        <span><i className="sw lose" /> Awikwok {100 - chance}%</span>
+        <span><i className="sw win" /> Win {chance}%</span>
+        <span><i className="sw lose" /> Loss {100 - chance}%</span>
       </div>
       <div className="roulette-result" aria-live="polite">
         {revealed ? (
           <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 18 }}>
-            <h3>{won ? `Menang x${mult}!` : 'Awikwok, kalah!'}</h3>
+            <h3>{won ? `Menang x${mult}!` : 'Awikwok mampus loss'}</h3>
             {won ? (
               <p className="roulette-coins">
                 <Coins size={18} strokeWidth={2.5} /> +<CountUp value={payout} />
@@ -115,7 +115,7 @@ export default function RouletteWheel({ result, onDone, onExit }) {
             {onExit}
           </motion.div>
         ) : (
-          <p className="note center-text">{phase === 'idle' ? 'tekan bulatan di tengah buat muter' : 'muter dulu...'}</p>
+          <p className="note center-text">{phase === 'idle' ? 'gas puter' : 'amanin jantung ngab...'}</p>
         )}
       </div>
     </div>
