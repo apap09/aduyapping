@@ -140,7 +140,7 @@ export default function Gamble() {
             min={1}
             max={max}
             value={bet}
-            placeholder="0"
+            placeholder="min 20 koin bre"
             onChange={(e) => setBet(e.target.value === '' ? '' : String(Math.min(max, Math.max(0, Math.floor(Number(e.target.value) || 0)))))}
           />
           <div className="field gamble-mult">
