@@ -106,7 +106,7 @@ export default function RouletteWheel({ result, onDone, onExit }) {
       <div className="roulette-result" aria-live="polite">
         {revealed ? (
           <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 18 }}>
-            <h3>{won ? `Menang x${mult}!` : 'Awikwok mampus loss'}</h3>
+            <h3>{won ? `anjg jago uga, ni x${mult}!` : 'Awikwok mampus loss'}</h3>
             {won ? (
               <p className="roulette-coins">
                 <Coins size={18} strokeWidth={2.5} /> +<CountUp value={payout} />
