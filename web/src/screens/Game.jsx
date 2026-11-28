@@ -23,50 +23,45 @@ function MatchTimer({ end }) {
   return <span className={`chip match-timer ${sec <= 30 ? 'low' : ''}`}>{txt}</span>;
 }
 
-// Lantai 2.5D: garis kertas diproyeksikan ke belakang (makin jauh makin rapat & pudar).
-// Hanya satu <svg> ringan (tanpa transform 3D), jadi aman untuk HP biasa.
-const FLOOR_H = 800;
-const FLOOR_LINES = (() => {
-  const d = 900;
-  const th = (40 * Math.PI) / 180;
+// Panggung 2.5D: selembar kertas bergaris dimiringkan (CSS 3D), karakter berdiri tegak di atasnya.
+const ROW_MAX = 4;
+function teamSpots(list, far) {
   const out = [];
-  for (let k = 1; k <= 90; k++) {
-    const y = k * 40;
-    const up = (d * y * Math.cos(th)) / (d + y * Math.sin(th));
-    const pct = (up / FLOOR_H) * 100;
-    if (pct > 100) break;
-    out.push({ y: 100 - pct, o: Math.max(0.2, 1 - pct / 100) });
-  }
-  return out;
-})();
+  const rows = Math.ceil(list.length / ROW_MAX);
+  list.forEach((p, i) => {
+    const r = Math.floor(i / ROW_MAX);
+    const inRow = Math.min(ROW_MAX, list.length - r * ROW_MAX);
+    const k = i % ROW_MAX;
+    const x = ((k + 1) / (inRow + 1)) * 100;
+    const y = far ? 15 + r * 17 : 85 - r * 17;
+    out.push({ p, x, y });
+  });
+  return { out, rows };
+}
 
-function Floor25() {
+function Slot3D({ x, y, children, down }) {
   return (
-    <>
-      <svg className="floor25" aria-hidden="true" focusable="false">
-        {FLOOR_LINES.map((l, i) => (
-          <line key={i} x1="0" x2="100%" y1={`${l.y}%`} y2={`${l.y}%`} stroke="#c9c9c9" strokeWidth="1" strokeOpacity={l.o} />
-        ))}
-      </svg>
-      <span className="floor25-haze" aria-hidden="true" />
-    </>
+    <div className={`slot3d ${down ? 'down' : ''}`} style={{ left: `${x}%`, top: `${y}%` }}>
+      <span className="spot" />
+      <div className="stand">{children}</div>
+    </div>
   );
 }
 
-function PlayerCard({ p, g, enemy, isTarget, onPick, style, depth }) {
+function PlayerCard({ p, g, enemy, isTarget, onPick, style, flat }) {
   const hit = g.lastHit && g.lastHit.to === p.id ? g.lastHit : null;
   const pickable = enemy && p.alive && !g.spectator;
   const Tag = pickable ? motion.button : motion.div;
   return (
     <Tag
       type={pickable ? 'button' : undefined}
-      layout
-      style={depth ? { ...style, '--d': depth } : style}
+      layout={flat ? false : true}
+      style={style}
       className={`pcard ${g.mode === 'team' ? `t${p.team}` : ''} ${enemy ? 'enemy' : 'ally'} ${isTarget ? 'target' : ''} ${p.alive ? '' : 'dead'} ${p.id === g.youId ? 'you' : ''}`}
       onClick={pickable ? () => onPick(p.id) : undefined}
       whileHover={pickable ? { y: -4 } : undefined}
       whileTap={pickable ? { scale: 0.9 } : undefined}
-      initial={{ opacity: 0, y: enemy ? -24 : 24, scale: 0.8 }}
+      initial={{ opacity: 0, y: flat ? 0 : enemy ? -24 : 24, scale: 0.8 }}
       animate={{ opacity: 1, y: 0, scale: isTarget ? 1.06 : 1 }}
       transition={{ type: 'spring', stiffness: 380, damping: 20 }}
     >
@@ -323,10 +318,9 @@ export default function Game() {
     const a = Math.PI / 2 + ((p.slot - ringBase + ringN) % ringN) * ((2 * Math.PI) / ringN);
     return { left: `${50 + Math.cos(a) * 40}%`, top: `${50 + Math.sin(a) * 41}%` };
   };
-  // 2.5D: makin ke atas (jauh) makin kecil, makin ke bawah (dekat) makin besar
-  const ringDepth = (p) => {
+  const ringXY = (p) => {
     const a = Math.PI / 2 + ((p.slot - ringBase + ringN) % ringN) * ((2 * Math.PI) / ringN);
-    return +(0.95 + Math.sin(a) * 0.17).toFixed(3);
+    return [50 + Math.cos(a) * 36, 50 + Math.sin(a) * 38];
   };
 
   const alive = !!(me && me.alive);
@@ -390,7 +384,6 @@ export default function Game() {
       animate={shake}
       onClick={() => inputRef.current && playing && !state.chat.open && inputRef.current.focus()}
     >
-      {fx ? <Floor25 /> : null}
       <div className="game-top">
         <MatchTimer end={g.timeEnd} />
         {solo ? (
@@ -416,14 +409,41 @@ export default function Game() {
         </button>
       </div>
 
-      {solo ? null : (
+      {fx ? (
+        <div className="stage3d">
+          <div className="board">
+            {(solo
+              ? everyone.map((p) => {
+                  const [x, y] = ringXY(p);
+                  return { p, x, y };
+                })
+              : [...teamSpots(spec ? allies : enemies, true).out, ...teamSpots(spec ? enemies : allies, false).out]
+            ).map(({ p, x, y }) => {
+              const foe = solo ? p.id !== g.youId : spec ? false : p.team !== myTeam;
+              return (
+                <Slot3D key={p.id} x={x} y={y} down={!p.alive}>
+                  <PlayerCard
+                    p={p}
+                    g={g}
+                    flat
+                    enemy={foe}
+                    isTarget={g.targetId === p.id}
+                    onPick={(id) => playing && actions.setTarget(id)}
+                  />
+                </Slot3D>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {solo || fx ? null : (
       <div className="team-row far">
         {(spec ? allies : enemies).map((p) => (
           <PlayerCard
             key={p.id}
             p={p}
             g={g}
-            depth={fx ? 0.84 : undefined}
             enemy={!spec}
             isTarget={g.targetId === p.id}
             onPick={(id) => playing && actions.setTarget(id)}
@@ -433,8 +453,8 @@ export default function Game() {
 
       )}
 
-      <div className={solo ? 'solo-stage' : 'arena-wrap'}>
-      {solo
+      <div className={solo && !fx ? 'solo-stage' : 'arena-wrap'}>
+      {solo && !fx
         ? everyone.map((p) => (
             <PlayerCard
               key={p.id}
@@ -443,7 +463,6 @@ export default function Game() {
               enemy={p.id !== g.youId}
               isTarget={g.targetId === p.id}
               style={ringPos(p)}
-              depth={fx ? ringDepth(p) : undefined}
               onPick={(id) => playing && actions.setTarget(id)}
             />
           ))
@@ -540,10 +559,10 @@ export default function Game() {
 
       </div>
 
-      {solo ? null : (
+      {solo || fx ? null : (
         <div className="team-row near">
           {(spec ? enemies : allies).map((p) => (
-            <PlayerCard key={p.id} p={p} g={g} enemy={false} isTarget={false} depth={fx ? 1.1 : undefined} />
+            <PlayerCard key={p.id} p={p} g={g} enemy={false} isTarget={false} />
           ))}
         </div>
       )}

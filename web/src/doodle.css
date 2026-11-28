@@ -448,62 +448,68 @@ html[data-theme='doodle'] .fold-item + .fold-item { border-top: 2px dashed var(-
 html[data-theme='doodle'] .fold-item:hover,
 html[data-theme='doodle'] .fold-item:active { background: var(--ink); color: #fff; }
 
-/* ---------- arena 2.5D: kertas bergaris jadi lantai, karakter berdiri di atasnya ---------- */
-html[data-theme='doodle'] .screen.game.fx25 { overflow: hidden; }
-html[data-theme='doodle'] .floor25 {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-  background: #fff;
+/* ---------- arena 2.5D: selembar kertas miring (CSS 3D), karakter berdiri di atasnya ---------- */
+.screen.game.fx25 { --tilt: 50deg; }
+.fx25 .stage3d {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  perspective: 720px;
+  perspective-origin: 50% 60%;
 }
-html[data-theme='doodle'] .floor25-haze {
+.fx25 .board {
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(to bottom, #fff 0%, rgba(255, 255, 255, 0) 16%);
-}
-html[data-theme='doodle'] .fx25 .team-row { gap: 4px; }
-html[data-theme='doodle'] .fx25 .pcard-avatar {
-  transform: scale(var(--d, 1));
+  left: 50%;
+  bottom: 7%;
+  width: min(96%, 370px);
+  aspect-ratio: 1 / 1.414;
+  transform-style: preserve-3d;
   transform-origin: 50% 100%;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%) rotateX(var(--tilt));
+  background-color: #fff;
+  background-image:
+    linear-gradient(to right, transparent 26px, #9a9a9a 26px, #9a9a9a 27.5px, transparent 27.5px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 23px, #cfcfcf 23px, #cfcfcf 24px);
+  border: 3px solid var(--ink);
+  border-radius: 4px 7px 4px 6px;
+  box-shadow: 7px 9px 0 rgba(0, 0, 0, 0.22), 0 0 0 1px #fff;
 }
-/* bayangan pensil di lantai + tab lipatan kertas di kaki */
-html[data-theme='doodle'] .fx25 .pcard-avatar::before {
-  content: '';
+.fx25 .slot3d {
   position: absolute;
-  left: 50%;
-  bottom: -7px;
-  width: 78%;
-  height: 12px;
-  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+/* bayangan pensil di atas kertas (rata dengan lantai) */
+.fx25 .spot {
+  position: absolute;
+  left: -30px;
+  top: -13px;
+  width: 60px;
+  height: 26px;
   border-radius: 50%;
-  background: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.55) 0 1.5px, rgba(0, 0, 0, 0) 1.5px 4px);
-  opacity: 0.8;
-  z-index: -1;
+  background: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0 1.5px, rgba(0, 0, 0, 0) 1.5px 4px);
+  border: 1.5px solid rgba(0, 0, 0, 0.45);
   pointer-events: none;
 }
-html[data-theme='doodle'] .fx25 .pcard-avatar::after {
-  content: '';
+/* karakter berdiri tegak (kebalikan dari kemiringan kertas) */
+.fx25 .stand {
   position: absolute;
-  left: 50%;
-  bottom: -3px;
-  width: 46%;
-  height: 7px;
-  transform: translateX(-50%);
+  left: -31px;
+  bottom: 0;
+  width: 62px;
+  transform-origin: 50% 100%;
+  transform: rotateX(calc(var(--tilt) * -1));
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fx25 .slot3d.down .stand { transform: rotateX(0deg); }
+.fx25 .stand .pcard {
+  width: 62px;
+  padding: 4px 3px;
   background: #fff;
-  border: 2px solid var(--ink);
-  border-top: 0;
-  clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%);
-  z-index: -1;
-  pointer-events: none;
+  box-shadow: 2px 3px 0 var(--ink);
 }
-/* mati: kertasnya rebah ke lantai */
-html[data-theme='doodle'] .fx25 .pcard.dead .pcard-avatar {
-  transform: perspective(240px) rotateX(64deg) scale(var(--d, 1));
-}
-html[data-theme='doodle'] .fx25 .pcard.dead .pcard-avatar::after { display: none; }
+.fx25 .stand .pcard-avatar { transform: scale(0.88); transform-origin: 50% 100%; }
+.fx25 .stand .pcard-name { font-size: 10px; }
+.fx25 .stand .pcard-hp { display: none; }
+.fx25 .stand .pcard.dead { opacity: 0.7; }
