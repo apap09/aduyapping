@@ -447,3 +447,63 @@ html[data-theme='doodle'] .fold-item {
 html[data-theme='doodle'] .fold-item + .fold-item { border-top: 2px dashed var(--ink); border-radius: 0 0 6px 9px; }
 html[data-theme='doodle'] .fold-item:hover,
 html[data-theme='doodle'] .fold-item:active { background: var(--ink); color: #fff; }
+
+/* ---------- arena 2.5D: kertas bergaris jadi lantai, karakter berdiri di atasnya ---------- */
+html[data-theme='doodle'] .screen.game.fx25 { overflow: hidden; }
+html[data-theme='doodle'] .floor25 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  background: #fff;
+}
+html[data-theme='doodle'] .floor25-haze {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #fff 0%, rgba(255, 255, 255, 0) 16%);
+}
+html[data-theme='doodle'] .fx25 .team-row { gap: 4px; }
+html[data-theme='doodle'] .fx25 .pcard-avatar {
+  transform: scale(var(--d, 1));
+  transform-origin: 50% 100%;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* bayangan pensil di lantai + tab lipatan kertas di kaki */
+html[data-theme='doodle'] .fx25 .pcard-avatar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 78%;
+  height: 12px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.55) 0 1.5px, rgba(0, 0, 0, 0) 1.5px 4px);
+  opacity: 0.8;
+  z-index: -1;
+  pointer-events: none;
+}
+html[data-theme='doodle'] .fx25 .pcard-avatar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 46%;
+  height: 7px;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+/* mati: kertasnya rebah ke lantai */
+html[data-theme='doodle'] .fx25 .pcard.dead .pcard-avatar {
+  transform: perspective(240px) rotateX(64deg) scale(var(--d, 1));
+}
+html[data-theme='doodle'] .fx25 .pcard.dead .pcard-avatar::after { display: none; }

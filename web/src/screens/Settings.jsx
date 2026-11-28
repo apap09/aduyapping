@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Volume2, VolumeX } from 'lucide-react';
+import { Gauge, LogOut, Volume2, VolumeX } from 'lucide-react';
 import { useApp } from '../store.jsx';
 import { Button, Field, Modal, PasswordField, Screen, Switch, TopBar } from '../components/ui.jsx';
 import { useSound } from '../lib/sound.js';
+import { usePerfMode } from '../lib/perf.js';
 
 function AccountForm() {
   const { state, actions } = useApp();
@@ -88,6 +89,7 @@ function AccountForm() {
 export default function SettingsScreen() {
   const { state, actions } = useApp();
   const [soundOn, setSoundOn] = useSound();
+  const [perfOn, setPerfOn] = usePerfMode();
   const [confirmOut, setConfirmOut] = useState(false);
   return (
     <Screen>
@@ -113,6 +115,28 @@ export default function SettingsScreen() {
           <small>{soundOn ? 'Efek suara menyala' : 'Efek suara mati'}</small>
         </span>
         <Switch checked={soundOn} onChange={setSoundOn} label="Efek suara" />
+      </motion.div>
+      <motion.div
+        className="setting-row"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 24, delay: 0.05 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <motion.span
+          key={perfOn ? 'on' : 'off'}
+          className="setting-icon"
+          initial={{ scale: 0.4, rotate: -35 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+        >
+          <Gauge size={22} strokeWidth={2.5} />
+        </motion.span>
+        <span className="setting-text">
+          <strong>Performance Mode</strong>
+          <small>ngebikin ringan gameplay</small>
+        </span>
+        <Switch checked={perfOn} onChange={setPerfOn} label="Performance Mode" />
       </motion.div>
       {state.user ? <AccountForm /> : null}
       <Button variant="ghost" icon={LogOut} className="logout-btn" onClick={() => setConfirmOut(true)}>
